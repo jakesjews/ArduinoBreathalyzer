@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include "FourDigitLCD.h"
 #include "BAC_Lookup.h"
 
 #define SENSOR_PIN  A0
@@ -10,9 +11,11 @@
 char temp_str[10];
 int sensor_read;
 uint8_t bac;
+FourDigitLCD lcd; 
 
 void setup() {
   Serial.begin(9600);
+  lcd.init();
   pinMode(SENSOR_PIN, INPUT);
 }
 
@@ -21,21 +24,18 @@ void loop() {
   
   if ( sensor_read < BAC_START ) {
       bac = 0;
-      Serial.println("0.000");
-  } else if ( sensor_read > BAC_END ) {
-      Serial.println("Error");
+      lcd.display("000");
   } else {
       sensor_read = sensor_read - BAC_START;
       bac = bac_chart[sensor_read];
+      String prefix = String("");
       if ( bac < 10 ) {
-        Serial.print("0.00");
+        prefix = String("00");
       } else if ( bac < 100 ) {
-        Serial.print("0.0");
-      } else {
-        Serial.print("0.");
+        prefix = String("0");
       }
-      Serial.println(bac);
+      lcd.display(String(prefix + String(bac)));
   }
-  delay(100);
+  //delay(100);
 }
 
