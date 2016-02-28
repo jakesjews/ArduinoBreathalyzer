@@ -2,7 +2,9 @@
 #include <Wire.h>
 #include "FourDigitLCD.h"
 #include "BacLookup.h"
+#include "Database.h"
 
+#define DEBUG       0
 #define SENSOR_PIN  A5
 #define S7_ADDR     0x71
 #define DEC_MASK    0b00000001
@@ -18,6 +20,11 @@ Thread bacThread = Thread();
 Thread displayThread = Thread();
 
 void setup() {
+  #if DEBUG
+  Serial.begin(9600);
+  while (!Serial) { ; }
+  #endif
+  
   lcd.init();
   pinMode(SENSOR_PIN, INPUT);
   
@@ -26,6 +33,8 @@ void setup() {
 
   displayThread.onRun(displayBac);
   displayThread.setInterval(1);
+
+  setupDatabase();
 }
 
 void setBac() {
