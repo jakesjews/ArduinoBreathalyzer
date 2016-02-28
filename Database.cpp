@@ -1,5 +1,6 @@
-#include "Database.h"
 #include <EEPROM.h>
+#include "Database.h"
+#include "BacFormat.h"
 
 int16_t currentIndex = 0;
 
@@ -27,7 +28,13 @@ void printScores() {
     EEPROM.get(i, toPrint);
     Serial.print(toPrint.initials);
     Serial.print(": ");
-    Serial.println(toPrint.bac);
+    Serial.println(String("0." + formatBac(toPrint.bac)));
+  }
+}
+
+void clearDatabase() {
+  for (int i = 0 ; i < EEPROM.length() ; i++) {
+    EEPROM.update(i, 0);
   }
 }
 

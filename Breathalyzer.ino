@@ -3,6 +3,7 @@
 #include "FourDigitLCD.h"
 #include "BacLookup.h"
 #include "Database.h"
+#include "Bacformat.h"
 
 #define DEBUG       0
 #define SENSOR_PIN  A5
@@ -34,6 +35,9 @@ void setup() {
   displayThread.onRun(displayBac);
   displayThread.setInterval(1);
 
+  storageThread.onRun(recordScore);
+  storageThread.setInterval(1000 * 10);
+
   setupDatabase();
 }
 
@@ -41,23 +45,30 @@ void setBac() {
   sensorRead = analogRead(SENSOR_PIN);
 
   if (sensorRead < BAC_START) {
-      bac = 0;
-      displayedBac = String("000");
-  } else {
-      sensorRead = sensorRead - BAC_START;
-      bac = BAC_CHART[sensorRead];
-      String prefix = String("");
-      if (bac < 10) {
-        prefix = String("00");
-      } else if (bac < 100) {
-        prefix = String("0");
-      }
-      displayedBac = String(prefix + String(bac));
+    bac = 0;
+    displayedBac = String("000");
+    return;
+  }
+  
+  sensorRead       = sensorRead - BAC_START;
+  uint8_t newBac   = BAC_CHART[sensorRead];
+  bool bacIsHigher = newBac > bac;
+  bac              = newBac;
+  displayedBac     = formatBac(bac);
+
+  if (bacIsHigher && storageThread.shouldRun()) {
+    storageThread.run();
   }
 }
 
 void displayBac() {
   lcd.display(displayedBac);
+}
+
+void recordScore() {
+  // TODO: capture initials
+  HighScore newScore = { "AAA", 102 };
+  writeScore(newScore);
 }
 
 void loop() {
@@ -67,6 +78,11 @@ void loop() {
 
   if (displayThread.shouldRun()) {
     displayThread.run();
+  }
+
+  // send 's' to show scores
+  if (Serial.available() > 0 && Serial.read() == 's') {
+    printScores();
   }
 }
 

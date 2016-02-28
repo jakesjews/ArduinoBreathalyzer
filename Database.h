@@ -8,3 +8,4 @@ struct HighScore {
 void setupDatabase();
 void writeScore(HighScore score);
 void printScores();
+void clearDatabase();
