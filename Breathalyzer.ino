@@ -11,13 +11,13 @@
 #define BAC_START   410     // Beginning ADC value of BAC chart
 #define BAC_END     859     // Last ADC value in BAC chart
 
-char temp_str[10];
-int sensor_read;
+int sensorRead;
 uint8_t bac;
 FourDigitLCD lcd;
 String displayedBac = String("000");
 Thread bacThread = Thread();
 Thread displayThread = Thread();
+Thread storageThread = Thread();
 
 void setup() {
   #if DEBUG
@@ -38,14 +38,14 @@ void setup() {
 }
 
 void setBac() {
-  sensor_read = analogRead(SENSOR_PIN);
+  sensorRead = analogRead(SENSOR_PIN);
 
-  if (sensor_read < BAC_START) {
+  if (sensorRead < BAC_START) {
       bac = 0;
       displayedBac = String("000");
   } else {
-      sensor_read = sensor_read - BAC_START;
-      bac = bac_chart[sensor_read];
+      sensorRead = sensorRead - BAC_START;
+      bac = BAC_CHART[sensorRead];
       String prefix = String("");
       if (bac < 10) {
         prefix = String("00");
